@@ -2,6 +2,7 @@ const express = require("express");
 const { User } = require("../model/model.js");
 const z = require("zod");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 
@@ -55,6 +56,39 @@ router.post("/signup", async (req, res) => {
     return res
       .status(500)
       .json({ success: false, message: "Error signing up" });
+  }
+});
+
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User does not exist" });
+    }
+
+    const pass = await bcrypt.compare(password, user.password);
+    if (!pass) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Incorrect password" });
+    }
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT);
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      token: token,
+    });
+  } catch (e) {
+    return res.status(500).json({
+      success: false,
+      message: "Error logging in",
+    });
   }
 });
 
