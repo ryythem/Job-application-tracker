@@ -92,4 +92,8 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.get("check", (req, res) => {
+  res.json({ message: "Endpoint working" });
+});
+
 module.exports = router;
