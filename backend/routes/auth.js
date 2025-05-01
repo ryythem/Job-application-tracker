@@ -92,6 +92,25 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.post("/forgot-password", async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "Account does not exist",
+    });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  await User.findOneAndUpdate({ email }, { password: hashedPassword });
+  return res
+    .status(200)
+    .json({ success: true, message: "Password changed successfully" });
+});
+
 router.get("check", (req, res) => {
   res.json({ message: "Endpoint working" });
 });
